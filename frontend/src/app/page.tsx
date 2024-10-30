@@ -85,9 +85,9 @@ export default function Home() {
       </div>
 
       {(currentFile || result) && (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 sticky top-8">
           {currentFile && (
-            <div className="lg:sticky lg:top-8">
+            <div>
               <PDFViewer file={currentFile} />
             </div>
           )}

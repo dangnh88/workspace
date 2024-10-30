@@ -18,17 +18,19 @@ export function PDFViewer({ file }: PDFViewerProps) {
   }, [file]);
 
   return (
-    <div className="w-full h-[600px] bg-white rounded-lg shadow-lg overflow-hidden">
-      <div className="bg-gray-100 px-4 py-2 border-b">
+    <div className="h-[calc(100vh-300px)] bg-white rounded-lg shadow-lg overflow-hidden">
+      <div className="bg-gray-100 px-4 py-2 border-b sticky top-0 z-10">
         <h3 className="text-sm font-medium text-gray-700">
           元のPDF: {file.name}
         </h3>
       </div>
-      <iframe
-        src={`${url}#toolbar=0`}
-        className="w-full h-full"
-        title="PDF preview"
-      />
+      <div className="h-[calc(100%-40px)] overflow-auto">
+        <iframe
+          src={`${url}#toolbar=0`}
+          className="w-full h-full"
+          title="PDF preview"
+        />
+      </div>
     </div>
   );
 } 

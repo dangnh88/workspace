@@ -18,8 +18,8 @@ export function ResultViewer({ content }: ResultViewerProps) {
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-lg overflow-hidden">
-      <div className="bg-gray-100 px-4 py-2 border-b flex justify-between items-center">
+    <div className="h-[calc(100vh-300px)] bg-white rounded-lg shadow-lg overflow-hidden">
+      <div className="bg-gray-100 px-4 py-2 border-b flex justify-between items-center sticky top-0 z-10">
         <h3 className="text-sm font-medium text-gray-700">
           処理結果
         </h3>
@@ -35,14 +35,16 @@ export function ResultViewer({ content }: ResultViewerProps) {
           {copied ? "コピーしました！" : "コピー"}
         </button>
       </div>
-      <div className="p-6">
-        <div className="prose prose-sm max-w-none">
-          <ReactMarkdown 
-            remarkPlugins={[remarkGfm]}
-            className="font-mono text-sm leading-relaxed"
-          >
-            {content}
-          </ReactMarkdown>
+      <div className="h-[calc(100%-40px)] overflow-auto">
+        <div className="p-6">
+          <div className="prose prose-sm max-w-none">
+            <ReactMarkdown 
+              remarkPlugins={[remarkGfm]}
+              className="font-mono text-sm leading-relaxed"
+            >
+              {content}
+            </ReactMarkdown>
+          </div>
         </div>
       </div>
     </div>
