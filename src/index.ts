@@ -3,11 +3,15 @@ import path from "path";
 import express, { Request, Response } from "express";
 import multer from "multer";
 import dotenv from "dotenv";
+import cors from 'cors';
 
 // Load environment variables from .env file
 dotenv.config();
 
 const app = express();
+
+// CORS設定を追加
+app.use(cors());
 
 // 静的ファイルの配信設定を追加
 app.use(express.static(path.join(__dirname, '../public')));
@@ -69,7 +73,7 @@ app.post('/process-pdf', upload.single('file'), async (req: MulterRequest, res: 
 });
 
 // サーバーの起動
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
 });
