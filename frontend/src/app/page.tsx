@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { FileUploader } from '@/components/FileUploader';
 import { ResultViewer } from '@/components/ResultViewer';
+import { PDFViewer } from '@/components/PDFViewer';
 
 interface APIResponse {
   result: {
@@ -22,10 +23,12 @@ export default function Home() {
   const [result, setResult] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [currentFile, setCurrentFile] = useState<File | null>(null);
 
   const handleUpload = async (file: File) => {
     setLoading(true);
     setError(null);
+    setCurrentFile(file);
     
     const formData = new FormData();
     formData.append('file', file);
@@ -47,7 +50,6 @@ export default function Home() {
 
       const data: APIResponse = await response.json();
       
-      // 全ページのコンテンツを結合
       if (data.result?.pages) {
         const allContent = data.result.pages
           .sort((a, b) => a.page - b.page)
@@ -66,10 +68,10 @@ export default function Home() {
   };
 
   return (
-    <main className="min-h-screen p-8 max-w-4xl mx-auto bg-gray-50">
+    <main className="min-h-screen p-8 max-w-7xl mx-auto bg-gray-50">
       <h1 className="text-3xl font-bold mb-8 text-gray-800">PDF Processor</h1>
       
-      <div className="bg-white rounded-lg shadow-sm p-6">
+      <div className="bg-white rounded-lg shadow-sm p-6 mb-8">
         <FileUploader 
           onUpload={handleUpload}
           loading={loading}
@@ -80,11 +82,22 @@ export default function Home() {
             {error}
           </div>
         )}
-
-        {result && (
-          <ResultViewer content={result} />
-        )}
       </div>
+
+      {(currentFile || result) && (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          {currentFile && (
+            <div className="lg:sticky lg:top-8">
+              <PDFViewer file={currentFile} />
+            </div>
+          )}
+          {result && (
+            <div>
+              <ResultViewer content={result} />
+            </div>
+          )}
+        </div>
+      )}
     </main>
   );
 } 

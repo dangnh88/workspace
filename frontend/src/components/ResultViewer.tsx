@@ -18,12 +18,15 @@ export function ResultViewer({ content }: ResultViewerProps) {
   };
 
   return (
-    <div className="mt-8 bg-white rounded-lg shadow-lg p-6">
-      <div className="relative">
+    <div className="bg-white rounded-lg shadow-lg overflow-hidden">
+      <div className="bg-gray-100 px-4 py-2 border-b flex justify-between items-center">
+        <h3 className="text-sm font-medium text-gray-700">
+          処理結果
+        </h3>
         <button
           onClick={handleCopy}
           className={`
-            absolute top-2 right-2 px-3 py-1 rounded text-sm
+            px-3 py-1 rounded text-sm
             ${copied 
               ? 'bg-green-500 text-white' 
               : 'bg-gray-200 hover:bg-gray-300'}
@@ -31,7 +34,9 @@ export function ResultViewer({ content }: ResultViewerProps) {
         >
           {copied ? "コピーしました！" : "コピー"}
         </button>
-        <div className="prose prose-sm max-w-none pt-8">
+      </div>
+      <div className="p-6">
+        <div className="prose prose-sm max-w-none">
           <ReactMarkdown 
             remarkPlugins={[remarkGfm]}
             className="font-mono text-sm leading-relaxed"
