@@ -4,6 +4,8 @@
   "main": "dist/index.js",
   "dependencies": {
     "dotenv": "^16.4.5",
+    "express": "^4.21.1",
+    "multer": "^1.4.5-lts.1",
     "zerox": "^1.0.31"
   },
   "scripts": {
@@ -16,7 +18,9 @@
   "license": "ISC",
   "description": "",
   "devDependencies": {
-    "@types/node": "^22.8.2",
+    "@types/express": "^5.0.0",
+    "@types/multer": "^1.4.12",
+    "@types/node": "^22.8.4",
     "nodemon": "^3.1.7",
     "ts-node": "^10.9.2",
     "typescript": "^5.6.3"

@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PDF Processor</title>
+    <script src="https://unpkg.com/react@17/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@17/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .container {
+            border: 2px dashed #ccc;
+            padding: 20px;
+            text-align: center;
+            margin: 20px 0;
+        }
+        .result {
+            margin-top: 20px;
+            white-space: pre-wrap;
+            text-align: left;
+        }
+        .loading {
+            color: #666;
+            margin: 10px 0;
+        }
+        .error {
+            color: red;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+    <script type="text/babel">
+        function App() {
+            const [file, setFile] = React.useState(null);
+            const [result, setResult] = React.useState(null);
+            const [loading, setLoading] = React.useState(false);
+            const [error, setError] = React.useState(null);
+
+            const handleFileChange = (event) => {
+                const selectedFile = event.target.files[0];
+                if (selectedFile && selectedFile.type === 'application/pdf') {
+                    setFile(selectedFile);
+                    setError(null);
+                } else {
+                    setError('PDFファイルを選択してください。');
+                    setFile(null);
+                }
+            };
+
+            const handleDrop = (event) => {
+                event.preventDefault();
+                const droppedFile = event.dataTransfer.files[0];
+                if (droppedFile && droppedFile.type === 'application/pdf') {
+                    setFile(droppedFile);
+                    setError(null);
+                } else {
+                    setError('PDFファイルを選択してください。');
+                }
+            };
+
+            const handleDragOver = (event) => {
+                event.preventDefault();
+            };
+
+            const handleSubmit = async () => {
+                if (!file) return;
+
+                setLoading(true);
+                setError(null);
+                const formData = new FormData();
+                formData.append('file', file);
+
+                try {
+                    const response = await fetch('/process-pdf', {
+                        method: 'POST',
+                        body: formData,
+                    });
+                    const data = await response.json();
+                    if (response.ok) {
+                        setResult(data.result);
+                    } else {
+                        setError(data.error || 'エラーが発生しました。');
+                    }
+                } catch (err) {
+                    setError('サーバーとの通信に失敗しました。');
+                } finally {
+                    setLoading(false);
+                }
+            };
+
+            return (
+                <div>
+                    <h1>PDF Processor</h1>
+                    <div 
+                        className="container"
+                        onDrop={handleDrop}
+                        onDragOver={handleDragOver}
+                    >
+                        <p>PDFファイルをドラッグ＆ドロップするか、選択してください</p>
+                        <input
+                            type="file"
+                            accept=".pdf"
+                            onChange={handleFileChange}
+                        />
+                        {file && (
+                            <div>
+                                <p>選択されたファイル: {file.name}</p>
+                                <button onClick={handleSubmit} disabled={loading}>
+                                    処理開始
+                                </button>
+                            </div>
+                        )}
+                        {loading && <div className="loading">処理中...</div>}
+                        {error && <div className="error">{error}</div>}
+                    </div>
+                    {result && (
+                        <div className="result">
+                            <h2>処理結果:</h2>
+                            <pre>{JSON.stringify(result, null, 2)}</pre>
+                        </div>
+                    )}
+                </div>
+            );
+        }
+
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+</body>
+</html> 
