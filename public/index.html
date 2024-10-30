@@ -13,36 +13,222 @@
             max-width: 800px;
             margin: 0 auto;
             padding: 20px;
+            background-color: #f5f5f5;
         }
         .container {
             border: 2px dashed #ccc;
             padding: 20px;
             text-align: center;
             margin: 20px 0;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .result-container {
+            margin-top: 20px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            padding: 20px;
         }
         .result {
-            margin-top: 20px;
+            background-color: #f8f9fa;
+            border-radius: 4px;
+            padding: 15px;
+            margin-top: 10px;
             white-space: pre-wrap;
             text-align: left;
+            font-family: 'Courier New', Courier, monospace;
+            position: relative;
         }
         .loading {
             color: #666;
             margin: 10px 0;
         }
         .error {
-            color: red;
+            color: #dc3545;
             margin: 10px 0;
+            padding: 10px;
+            background-color: #f8d7da;
+            border-radius: 4px;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+            transition: background-color 0.2s;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+        .copy-button {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: #6c757d;
+            font-size: 0.8em;
+        }
+        .copy-button:hover {
+            background-color: #5a6268;
+        }
+        .result-section {
+            margin-bottom: 15px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 15px;
+        }
+        .result-section:last-child {
+            border-bottom: none;
+        }
+        .result-label {
+            font-weight: bold;
+            color: #495057;
+            margin-bottom: 5px;
+        }
+        .drop-zone {
+            border: 2px dashed #007bff;
+            border-radius: 4px;
+            padding: 40px 20px;
+            text-align: center;
+            background-color: #f8f9fa;
+            transition: border-color 0.2s;
+        }
+        .drop-zone.drag-over {
+            border-color: #28a745;
+            background-color: #e9ecef;
+        }
+        .receipt-content {
+            font-family: 'Courier New', Courier, monospace;
+            line-height: 1.5;
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 4px;
+            border: 1px solid #e9ecef;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        .receipt-line {
+            margin: 4px 0;
+            padding: 2px 0;
+            display: block;
+        }
+        .receipt-amount {
+            font-weight: bold;
+            color: #212529;
+            background-color: #e9ecef;
+            padding: 2px 4px;
+            border-radius: 2px;
+        }
+        .receipt-date {
+            color: #6c757d;
+            font-style: italic;
+        }
+        .receipt-company {
+            font-weight: bold;
+            margin: 8px 0;
+            color: #0056b3;
+        }
+        .receipt-separator {
+            border-top: 1px dashed #dee2e6;
+            margin: 10px 0;
+            height: 1px;
         }
     </style>
 </head>
 <body>
     <div id="root"></div>
     <script type="text/babel">
+        function formatReceiptContent(content) {
+            const match = content.match(/```\n([\s\S]*)\n```/);
+            if (!match) return content;
+
+            const receiptText = match[1];
+            const lines = receiptText.split('\n');
+
+            const consolidatedLines = lines.reduce((acc, line, index) => {
+                if (line.trim() === '') {
+                    if (index > 0 && lines[index - 1].trim() !== '') {
+                        acc.push({ type: 'separator' });
+                    }
+                } else {
+                    acc.push({ type: 'text', content: line });
+                }
+                return acc;
+            }, []);
+
+            return (
+                <div className="receipt-content">
+                    {consolidatedLines.map((line, index) => {
+                        if (line.type === 'separator') {
+                            return <div key={`sep-${index}`} className="receipt-separator" />;
+                        }
+
+                        const text = line.content;
+                        const isAmount = /[¥￥]|円/.test(text);
+                        const isDate = /(\d+年\s*\d+月\s*\d+日)/.test(text);
+                        const isCompany = /(株式会社|TEL|電話|〒)/.test(text);
+
+                        let className = 'receipt-line';
+                        if (isAmount) className += ' receipt-amount';
+                        if (isDate) className += ' receipt-date';
+                        if (isCompany) className += ' receipt-company';
+
+                        let displayText = text;
+                        if (isAmount) {
+                            displayText = text.replace(
+                                /([¥￥])\s*(\d+(?:,\d{3})*)/g,
+                                '$1 $2'
+                            );
+                        }
+
+                        return (
+                            <span key={index} className={className}>
+                                {displayText}
+                            </span>
+                        );
+                    })}
+                </div>
+            );
+        }
+
+        function ResultSection({ label, content }) {
+            const [copied, setCopied] = React.useState(false);
+
+            const handleCopy = async () => {
+                await navigator.clipboard.writeText(content);
+                setCopied(true);
+                setTimeout(() => setCopied(false), 2000);
+            };
+
+            return (
+                <div className="result-section">
+                    <div className="result-label">{label}</div>
+                    <div className="result">
+                        {label === 'content' ? formatReceiptContent(content) : content}
+                        <button 
+                            className="copy-button"
+                            onClick={handleCopy}
+                        >
+                            {copied ? "コピーしました！" : "コピー"}
+                        </button>
+                    </div>
+                </div>
+            );
+        }
+
         function App() {
             const [file, setFile] = React.useState(null);
             const [result, setResult] = React.useState(null);
             const [loading, setLoading] = React.useState(false);
             const [error, setError] = React.useState(null);
+            const [isDragOver, setIsDragOver] = React.useState(false);
 
             const handleFileChange = (event) => {
                 const selectedFile = event.target.files[0];
@@ -57,6 +243,7 @@
 
             const handleDrop = (event) => {
                 event.preventDefault();
+                setIsDragOver(false);
                 const droppedFile = event.dataTransfer.files[0];
                 if (droppedFile && droppedFile.type === 'application/pdf') {
                     setFile(droppedFile);
@@ -68,6 +255,11 @@
 
             const handleDragOver = (event) => {
                 event.preventDefault();
+                setIsDragOver(true);
+            };
+
+            const handleDragLeave = () => {
+                setIsDragOver(false);
             };
 
             const handleSubmit = async () => {
@@ -96,35 +288,50 @@
                 }
             };
 
+            const formatResult = (result) => {
+                if (!result) return null;
+                
+                return Object.entries(result).map(([key, value], index) => (
+                    <ResultSection 
+                        key={index}
+                        label={key}
+                        content={typeof value === 'object' ? JSON.stringify(value, null, 2) : value}
+                    />
+                ));
+            };
+
             return (
                 <div>
                     <h1>PDF Processor</h1>
-                    <div 
-                        className="container"
-                        onDrop={handleDrop}
-                        onDragOver={handleDragOver}
-                    >
-                        <p>PDFファイルをドラッグ＆ドロップするか、選択してください</p>
-                        <input
-                            type="file"
-                            accept=".pdf"
-                            onChange={handleFileChange}
-                        />
+                    <div className="container">
+                        <div 
+                            className={`drop-zone ${isDragOver ? 'drag-over' : ''}`}
+                            onDrop={handleDrop}
+                            onDragOver={handleDragOver}
+                            onDragLeave={handleDragLeave}
+                        >
+                            <p>PDFファイルをドラッグ＆ドロップするか、選択してください</p>
+                            <input
+                                type="file"
+                                accept=".pdf"
+                                onChange={handleFileChange}
+                            />
+                        </div>
                         {file && (
                             <div>
                                 <p>選択されたファイル: {file.name}</p>
                                 <button onClick={handleSubmit} disabled={loading}>
-                                    処理開始
+                                    {loading ? '処理中...' : '処理開始'}
                                 </button>
                             </div>
                         )}
-                        {loading && <div className="loading">処理中...</div>}
+                        {loading && <div className="loading">PDFを処理しています...</div>}
                         {error && <div className="error">{error}</div>}
                     </div>
                     {result && (
-                        <div className="result">
-                            <h2>処理結果:</h2>
-                            <pre>{JSON.stringify(result, null, 2)}</pre>
+                        <div className="result-container">
+                            <h2>処理結果</h2>
+                            {formatResult(result)}
                         </div>
                     )}
                 </div>
