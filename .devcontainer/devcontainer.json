@@ -1,0 +1,28 @@
+{
+  "name": "TypeScript Dev Container",
+  "build": {
+    "dockerfile": "Dockerfile"
+  },
+  "workspaceFolder": "/workspace",
+  "mounts": [
+    "source=${localWorkspaceFolder},target=/workspace,type=bind,consistency=cached"
+  ],
+  "customizations": {
+    "vscode": {
+        "settings": {
+            "terminal.integrated.defaultProfile.linux": "bash",
+            "files.encoding": "utf8",
+            "terminal.integrated.env.linux": {
+                "LANG": "en_US.UTF-8",
+                "LANGUAGE": "en_US:en",
+                "LC_ALL": "en_US.UTF-8"
+            }
+        },
+        "extensions": [
+            "dbaeumer.vscode-eslint",
+            "esbenp.prettier-vscode"
+        ]
+    }
+},
+"postCreateCommand": "echo 'LC_ALL=en_US.UTF-8' >> /etc/environment && echo 'LANG=en_US.UTF-8' >> /etc/environment",
+}
