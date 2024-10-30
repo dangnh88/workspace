@@ -4,7 +4,6 @@
   "main": "dist/index.js",
   "dependencies": {
     "dotenv": "^16.4.5",
-    "next": "^15.0.2",
     "zerox": "^1.0.31"
   },
   "scripts": {
