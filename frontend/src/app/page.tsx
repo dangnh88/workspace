@@ -1,11 +1,25 @@
 'use client';
 
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { FileUploader } from '@/components/FileUploader';
 import { ResultViewer } from '@/components/ResultViewer';
 
+interface APIResponse {
+  result: {
+    pages: Array<{
+      content: string;
+      page: number;
+      contentLength: number;
+    }>;
+    completionTime: number;
+    fileName: string;
+    inputTokens: number;
+    outputTokens: number;
+  };
+}
+
 export default function Home() {
-  const [result, setResult] = useState<any>(null);
+  const [result, setResult] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -20,15 +34,31 @@ export default function Home() {
       const response = await fetch('http://localhost:4000/process-pdf', {
         method: 'POST',
         body: formData,
+        mode: 'cors',
+        credentials: 'include',
+        headers: {
+          'Accept': 'application/json',
+        },
       });
-      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data: APIResponse = await response.json();
       
-      if (response.ok) {
-        setResult(data.result);
+      // 全ページのコンテンツを結合
+      if (data.result?.pages) {
+        const allContent = data.result.pages
+          .sort((a, b) => a.page - b.page)
+          .map(page => page.content)
+          .join('\n\n---\n\n');
+        setResult(allContent);
       } else {
-        setError(data.error || 'エラーが発生しました。');
+        setError('PDFの処理結果が見つかりませんでした。');
       }
     } catch (err) {
+      console.error('API Error:', err);
       setError('サーバーとの通信に失敗しました。');
     } finally {
       setLoading(false);
@@ -36,23 +66,25 @@ export default function Home() {
   };
 
   return (
-    <main className="min-h-screen p-8 max-w-4xl mx-auto">
-      <h1 className="text-3xl font-bold mb-8">PDF Processor</h1>
+    <main className="min-h-screen p-8 max-w-4xl mx-auto bg-gray-50">
+      <h1 className="text-3xl font-bold mb-8 text-gray-800">PDF Processor</h1>
       
-      <FileUploader 
-        onUpload={handleUpload}
-        loading={loading}
-      />
+      <div className="bg-white rounded-lg shadow-sm p-6">
+        <FileUploader 
+          onUpload={handleUpload}
+          loading={loading}
+        />
 
-      {error && (
-        <div className="mt-4 p-4 bg-red-50 text-red-700 rounded-lg">
-          {error}
-        </div>
-      )}
+        {error && (
+          <div className="mt-4 p-4 bg-red-50 text-red-700 rounded-lg border border-red-200">
+            {error}
+          </div>
+        )}
 
-      {result && (
-        <ResultViewer result={result} />
-      )}
+        {result && (
+          <ResultViewer content={result} />
+        )}
+      </div>
     </main>
   );
 } 

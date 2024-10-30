@@ -15,6 +15,18 @@ module.exports = {
             },
             'code::after': {
               content: '""'
+            },
+            'pre': {
+              backgroundColor: '#f8f9fa',
+              padding: '1rem',
+              borderRadius: '0.5rem',
+              overflowX: 'auto',
+            },
+            'code': {
+              backgroundColor: '#f3f4f6',
+              padding: '0.2em 0.4em',
+              borderRadius: '0.25rem',
+              fontSize: '0.875em',
             }
           }
         }

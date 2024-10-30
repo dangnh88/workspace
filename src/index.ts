@@ -10,8 +10,13 @@ dotenv.config();
 
 const app = express();
 
-// CORS設定を追加
-app.use(cors());
+// CORS設定をより具体的に
+app.use(cors({
+  origin: ['http://localhost:3000'], // フロントエンドのURL
+  methods: ['GET', 'POST'],
+  allowedHeaders: ['Content-Type'],
+  credentials: true
+}));
 
 // 静的ファイルの配信設定を追加
 app.use(express.static(path.join(__dirname, '../public')));
