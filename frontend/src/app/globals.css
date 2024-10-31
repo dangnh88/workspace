@@ -12,21 +12,38 @@
 body {
   background: var(--background);
   color: var(--foreground);
+  min-height: 100vh;
 }
 
 @layer components {
   .glass-container {
-    @apply bg-white/70 backdrop-blur-lg border border-white/20 shadow-xl;
+    @apply bg-white/70 backdrop-blur-lg border border-white/20 shadow-xl rounded-2xl;
   }
   
   .gradient-border {
-    @apply relative rounded-xl;
+    @apply relative rounded-xl overflow-hidden;
     background: linear-gradient(to right, #2563eb, #4f46e5);
     padding: 1px;
   }
   
   .gradient-border > * {
-    @apply bg-white rounded-xl;
+    @apply bg-white rounded-xl h-full;
+  }
+
+  .viewer-container {
+    @apply h-[calc(100vh-300px)] min-h-[500px] bg-white rounded-lg shadow-lg overflow-hidden;
+  }
+
+  .viewer-header {
+    @apply bg-gray-100 px-4 py-2 border-b sticky top-0 z-10 flex justify-between items-center;
+  }
+
+  .viewer-content {
+    @apply h-[calc(100%-40px)] overflow-auto;
+  }
+
+  .markdown-content {
+    @apply p-6 prose prose-sm max-w-none;
   }
 }
 
